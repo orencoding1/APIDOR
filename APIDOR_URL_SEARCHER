@@ -1,0 +1,125 @@
+# -*- coding: utf-8 -*-
+import requests
+from bs4 import BeautifulSoup
+from colorama import init, Fore, Style
+import itertools
+import sys
+import time
+
+# Inisialisasi colorama
+init(autoreset=True)
+
+def cari_api(url):
+    try:
+        message = f"Sedang mencari API pada URL: {url}"
+        spinner = itertools.cycle(['/', '-', '\\', '|'])
+        print(Fore.YELLOW + message, end=' ', flush=True)
+
+        for _ in range(10):  # Menampilkan spinner untuk beberapa iterasi
+            print(next(spinner), end='', flush=True)
+            time.sleep(0.1)
+            print('\b', end='', flush=True)
+
+        response = requests.get(url)
+        if response.status_code == 200:
+            soup = BeautifulSoup(response.content, 'html.parser')
+            # Lakukan pencarian elemen yang mengandung API
+            api_elements = soup.find_all('a', href=True)  # Gantikan dengan metode yang sesuai
+            # Ambil URL API dan simpan dalam list
+            api_urls = [link['href'] for link in api_elements]
+            return api_urls
+        else:
+            print(Fore.RED + f"\nGagal mengambil halaman: {response.status_code}")
+            return []
+    except Exception as e:
+        print(Fore.RED + f"\nTerjadi kesalahan: {str(e)}")
+        return []
+    finally:
+        # Hentikan spinner
+        print('\b \b', end='', flush=True)
+
+def simpan_ke_file(nama_file, data):
+    with open(nama_file, 'w') as file:
+        for item in data:
+            file.write("%s\n" % item)
+    print(Fore.GREEN + f"\nData berhasil disimpan ke {nama_file}")
+
+def hasil_scan(api_urls):
+    print(Fore.GREEN + "\n=== Hasil Scanning ===\n")
+    for index, api_url in enumerate(api_urls, start=1):
+        print(f"{Fore.CYAN}[{index}] {Fore.WHITE}{api_url}")
+    print()
+
+def media_sosial_creator():
+    print(Fore.GREEN + "\n=== Media Sosial Creator ===\n")
+    print("1. Facebook: https://www.facebook.com/dio.p.1694")
+    print("2. Instagram: https://instagram.com/nadxsyr")
+    print("3. Youtube: https://youtube.com/@nadssecurity?si=spZ5VCSh_wTS2Kl5")
+    print()
+
+def baca_file_hasil_scan(nama_file):
+    try:
+        with open(nama_file, 'r') as file:
+            print(Fore.GREEN + f"\n=== Isi File {nama_file} ===\n")
+            for line in file:
+                print(line.strip())
+            print()
+    except FileNotFoundError:
+        print(Fore.RED + f"File '{nama_file}' tidak ditemukan.")
+
+def main_menu():
+    logo = """
+  █████╗ ██████╗ ██╗██████╗  ██████╗ ██████╗ ██╗
+ ██╔══██╗██╔══██╗██║██╔══██╗██╔═══██╗██╔══██╗██║
+ ███████║██████╔╝██║██║  ██║██║   ██║██████╔╝██║
+ ██╔══██║██╔═══╝ ██║██║  ██║██║   ██║██╔══██╗╚═╝
+ ██║  ██║██║     ██║██████╔╝╚██████╔╝██║  ██║██╗
+ ╚═╝  ╚═╝╚═╝     ╚═╝╚═════╝  ╚═════╝ ╚═╝  ╚═╝╚═╝
+    """
+    print(Fore.GREEN + logo.center(50))
+    print(Fore.GREEN + "Dibuat Oleh NadSec ❤".center(50) + "\n")
+
+    while True:
+        print(Fore.YELLOW + "Menu:")
+        print("1. Scan API 🔍")
+        print("2. Hasil Scan Apidor 📃")
+        print("3. Media Sosial Creator ☎")
+        print("4. Keluar 👋")
+
+        pilihan = input(Fore.YELLOW + "Pilih menu (1/2/3/4): ").strip()
+
+        if pilihan == '1':
+            url = input(Fore.YELLOW + "Masukkan URL web target: ").strip()
+            api_urls = cari_api(url)
+            if api_urls:
+                hasil_scan(api_urls)
+                nama_file = input(Fore.YELLOW + "Masukkan nama file untuk menyimpan URL API (contoh 'hasil_scanning.txt'): ").strip()
+                simpan_ke_file(nama_file, api_urls)
+                print(Fore.GREEN + f"\nURL API telah disimpan di '{nama_file}'")
+            else:
+                print(Fore.RED + "Tidak ditemukan URL API pada halaman tersebut.")
+
+        elif pilihan == '2':
+            print(Fore.YELLOW + "Anda memilih: Hasil Scan Apidor")
+            nama_file = input(Fore.YELLOW + "Masukkan nama file hasil scan (contoh 'hasil_scanning.txt'): ").strip()
+            baca_file_hasil_scan(nama_file)
+
+        elif pilihan == '3':
+            media_sosial_creator()
+
+        elif pilihan == '4':
+            print(Fore.YELLOW + "Keluar dari tool.")
+            print(Fore.GREEN + """
+  
+╔═╗╔═╗╦  ╔═╗╔╦╗╔═╗╔╦╗  ╔╦╗╦╔╗╔╔═╗╔═╗╔═╗╦    ╦ ╦╔═╗╔═╗╦═╗
+╚═╗║╣ ║  ╠═╣║║║╠═╣ ║    ║ ║║║║║ ╦║ ╦╠═╣║    ║ ║╚═╗║╣ ╠╦╝
+╚═╝╚═╝╩═╝╩ ╩╩ ╩╩ ╩ ╩    ╩ ╩╝╚╝╚═╝╚═╝╩ ╩╩═╝  ╚═╝╚═╝╚═╝╩╚═
+
+""")
+            break
+
+        else:
+            print(Fore.RED + "Pilihan tidak valid. Silakan pilih lagi.")
+
+if __name__ == "__main__":
+    main_menu()
